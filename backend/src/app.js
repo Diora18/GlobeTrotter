@@ -7,7 +7,9 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.routes');
 const tripRoutes = require('./routes/trip.routes');
 const stopRoutes = require('./routes/stop.routes');
+const stopActivityRoutes = require('./routes/stopActivity.routes');
 const cityRoutes = require('./routes/city.routes');
+const activityRoutes = require('./routes/activity.routes');
 const authMiddleware = require('./middleware/auth.middleware');
 const errorMiddleware = require('./middleware/error.middleware');
 
@@ -27,7 +29,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', authMiddleware, tripRoutes);
 app.use('/api/stops', authMiddleware, stopRoutes);
+app.use('/api/stop-activities', authMiddleware, stopActivityRoutes);
 app.use('/api/cities', cityRoutes);
+app.use('/api/activities', activityRoutes);
 
 app.use(errorMiddleware);
 

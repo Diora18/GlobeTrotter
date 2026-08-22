@@ -23,7 +23,7 @@ Status key: `🟡 in progress` · `🔵 ready for review` · `✅ merged to main
 |--------|-------|--------|-------------|
 | `feat/be-foundation` | Backend | 🔵 ready for review | Merge 1st |
 | `feat/fe-setup` | Frontend | 🟡 not started | Merge 2nd (after be-foundation) |
-| `feat/be-activities` | Backend | 🟡 not started | — |
+| `feat/be-activities` | Backend | 🔵 ready for review | Merge after be-foundation |
 | `feat/fe-builder` | Frontend | 🟡 not started | — |
 
 ---
@@ -195,36 +195,72 @@ npm run dev    # http://localhost:5173
 
 ---
 
-## `feat/be-activities` — Activities + stop-activities API
+## `feat/be-activities` — Activities + budget API
 
-**Status:** 🟡 not started  
+**Status:** 🔵 ready for review  
 **Owner:** Backend  
-**Depends on:** `feat/be-foundation` merged
+**Depends on:** `feat/be-foundation`  
+**Merge order:** Merge after `feat/be-foundation` is on `main`
 
-### What to include
+### What's included
 
-- `GET /api/activities` with filters
-- `POST /api/stops/:stopId/activities`
-- `DELETE /api/stop-activities/:id`
-- `PATCH /api/stop-activities/:id`
+- `GET /api/activities` — list/filter catalog activities
+- `GET /api/activities/:id` — single activity
+- `POST /api/stops/:stopId/activities` — add activity to stop
+- `PATCH /api/stop-activities/:id` — update time/cost/order
+- `DELETE /api/stop-activities/:id` — remove from stop
+- `GET /api/trips/:id/budget` — full budget breakdown
+
+### API docs
+
+- [activities.md](./api/activities.md)
+- [stop-activities.md](./api/stop-activities.md)
+- [budget.md](./api/budget.md)
 
 ### Backend checks
 
-- [ ] List activities for a city: `curl "http://localhost:3001/api/activities?cityId=CITY_ID"`
-- [ ] Add activity to stop: `POST /api/stops/STOP_ID/activities`
-- [ ] Remove activity from stop: `DELETE /api/stop-activities/ID`
+```bash
+git checkout feat/be-activities
+cd backend && npm run dev
+```
+
+Login first (save cookies.txt), then:
+
+- [ ] List activities for Paris city
+  ```bash
+  curl "http://localhost:3001/api/activities?cityId=CITY_ID&type=sightseeing"
+  ```
+
+- [ ] Add activity to a stop
+  ```bash
+  curl -X POST http://localhost:3001/api/stops/STOP_ID/activities \
+    -H "Content-Type: application/json" -b cookies.txt \
+    -d '{"activityId":"ACTIVITY_ID"}'
+  ```
+
+- [ ] Get budget breakdown
+  ```bash
+  curl http://localhost:3001/api/trips/TRIP_ID/budget -b cookies.txt
+  # Expected: totalEstimated, byCategory, byDay, byStop, alerts
+  ```
+
+- [ ] Remove activity from stop
+  ```bash
+  curl -X DELETE http://localhost:3001/api/stop-activities/STOP_ACTIVITY_ID -b cookies.txt
+  ```
 
 ### Frontend — what to verify
 
-- [ ] Activity picker shows in itinerary builder
-- [ ] Can filter activities by type and cost
-- [ ] Adding/removing activities updates the stop in UI
+- [ ] Activity picker loads activities for stop's city
+- [ ] Can filter by type and max cost
+- [ ] Adding activity updates itinerary view
+- [ ] Budget page shows charts from `byCategory` data
 
 ### Merge checklist
 
-- [ ] Backend checks pass
-- [ ] Frontend activity picker works against API
-- [ ] Update `docs/api/activities.md` and `docs/api/stop-activities.md` if changed
+- [ ] All backend checks pass
+- [ ] `feat/be-foundation` already merged to `main`
+- [ ] Rebase this branch on `main` before merging
 - [ ] Merge to `main`
 
 ---

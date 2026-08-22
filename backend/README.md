@@ -59,5 +59,11 @@ curl "http://localhost:3001/api/cities?limit=5"
 | DELETE | /api/stops/:id | Yes |
 | GET | /api/cities | No |
 | GET | /api/cities/:id | No |
+| GET | /api/activities | No |
+| GET | /api/activities/:id | No |
+| POST | /api/stops/:stopId/activities | Yes |
+| PATCH | /api/stop-activities/:id | Yes |
+| DELETE | /api/stop-activities/:id | Yes |
+| GET | /api/trips/:id/budget | Yes |
 
 See `../docs/api/` for full request/response contracts.

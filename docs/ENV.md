@@ -59,12 +59,17 @@ docker run -d \
 
 Then use: `postgresql://postgres:postgres@localhost:5432/globetrotter`
 
-**Option C — Homebrew**
+**Option C — Homebrew (your setup)**
+
+Homebrew Postgres uses your Mac username with no password:
+
+```env
+DATABASE_URL="postgresql://khushpatel@localhost:5432/globetrotter"
+```
 
 ```bash
-brew install postgresql@16
-brew services start postgresql@16
-createdb globetrotter
+brew services start postgresql@18
+createdb globetrotter   # if database doesn't exist yet
 ```
 
 ## Setup checklist (backend dev)

@@ -16,6 +16,7 @@ Milestones and ownership for a **2-person team**. Local development only — no 
 3. **Unblock early.** Backend should ship auth + trip list before frontend builds dashboard. Frontend can use mock data briefly but switch to real API ASAP.
 4. **Both run locally.** Backend `:3001`, frontend `:5173`, Postgres on your machine.
 5. **Quick sync points.** After each phase below, do a 10-min demo: backend shows API in Postman/curl, frontend shows the screen.
+6. **Update [INTEGRATION.md](./INTEGRATION.md)** when a branch is ready for review or merged.
 
 ---
 

@@ -37,6 +37,7 @@ globetrotter/
 | Environment setup | [ENV.md](./ENV.md) |
 | Code style & git workflow | [CONVENTIONS.md](./CONVENTIONS.md) |
 | Who owns what | [TASKS.md](./TASKS.md) |
+| Branch status & test checklists | [INTEGRATION.md](./INTEGRATION.md) |
 
 ## Local development
 

@@ -13,8 +13,12 @@ function formatUser(user) {
     id: user.id,
     email: user.email,
     name: user.name,
-    avatarUrl: user.avatarUrl,
-    language: user.language,
+    phoneNumber: user.phoneNumber || null,
+    city: user.city || null,
+    country: user.country || null,
+    avatarUrl: user.avatarUrl || null,
+    language: user.language || 'en',
+    isAdmin: Boolean(user.isAdmin),
     ...(user.createdAt ? { createdAt: formatDateTime(user.createdAt) } : {}),
   };
 }
@@ -82,16 +86,30 @@ function formatStop(stop) {
 }
 
 function formatTripSummary(trip) {
+  let totalEstimatedCost = 0;
+  if (trip.stops && Array.isArray(trip.stops)) {
+    for (const stop of trip.stops) {
+      totalEstimatedCost += (stop.estimatedStayCost || 0) + (stop.estimatedTransportCost || 0) + (stop.estimatedMealCost || 0);
+      if (stop.activities && Array.isArray(stop.activities)) {
+        for (const sa of stop.activities) {
+          totalEstimatedCost += sa.costOverride ?? (sa.activity?.estimatedCost || 0);
+        }
+      }
+    }
+  }
+
   return {
     id: trip.id,
     name: trip.name,
     startDate: formatDate(trip.startDate),
     endDate: formatDate(trip.endDate),
+    travelerCount: trip.travelerCount || 1,
     description: trip.description,
     coverPhotoUrl: trip.coverPhotoUrl,
     isPublic: trip.isPublic,
     shareSlug: trip.shareSlug,
-    stopCount: trip._count?.stops ?? trip.stopCount ?? 0,
+    stopCount: trip._count?.stops ?? trip.stops?.length ?? trip.stopCount ?? 0,
+    totalEstimatedCost,
     createdAt: formatDateTime(trip.createdAt),
     updatedAt: formatDateTime(trip.updatedAt),
   };

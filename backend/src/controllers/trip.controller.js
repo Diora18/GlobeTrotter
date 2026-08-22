@@ -45,4 +45,22 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { list, create, getById, update, remove };
+async function getBySlug(req, res, next) {
+  try {
+    const trip = await tripService.getTripBySlug(req.params.slug);
+    res.status(200).json({ success: true, data: { trip } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function duplicate(req, res, next) {
+  try {
+    const trip = await tripService.duplicateTrip(req.params.id, req.user.id);
+    res.status(201).json({ success: true, data: { trip } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { list, create, getById, update, remove, getBySlug, duplicate };

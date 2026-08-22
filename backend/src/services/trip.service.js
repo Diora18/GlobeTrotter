@@ -32,7 +32,14 @@ async function listTrips(userId, { sort = 'upcoming', limit }) {
     where: { userId },
     orderBy,
     take: limit ? Number(limit) : undefined,
-    include: { _count: { select: { stops: true } } },
+    include: {
+      stops: {
+        include: {
+          activities: { include: { activity: true } },
+        },
+      },
+      _count: { select: { stops: true } },
+    },
   });
 
   return trips.map(formatTripSummary);
@@ -45,6 +52,7 @@ async function createTrip(userId, data) {
       name: data.name,
       startDate: new Date(data.startDate),
       endDate: new Date(data.endDate),
+      travelerCount: data.travelerCount || 1,
       description: data.description,
       coverPhotoUrl: data.coverPhotoUrl,
     },
@@ -75,6 +83,9 @@ async function updateTrip(tripId, userId, data) {
   if (data.coverPhotoUrl !== undefined) updateData.coverPhotoUrl = data.coverPhotoUrl;
   if (data.startDate) updateData.startDate = new Date(data.startDate);
   if (data.endDate) updateData.endDate = new Date(data.endDate);
+  if (data.travelerCount !== undefined) updateData.travelerCount = data.travelerCount;
+  if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+  if (data.shareSlug !== undefined) updateData.shareSlug = data.shareSlug;
 
   const trip = await prisma.trip.update({
     where: { id: tripId },
@@ -90,11 +101,78 @@ async function deleteTrip(tripId, userId) {
   await prisma.trip.delete({ where: { id: tripId } });
 }
 
+async function getTripBySlug(slug) {
+  const trip = await prisma.trip.findUnique({
+    where: { shareSlug: slug },
+    include: tripDetailInclude,
+  });
+
+  if (!trip) throw notFound('Trip not found');
+  if (!trip.isPublic) throw forbidden('This trip is private');
+
+  return formatTripDetail(trip);
+}
+
+async function duplicateTrip(tripId, userId) {
+  const original = await prisma.trip.findUnique({
+    where: { id: tripId },
+    include: tripDetailInclude,
+  });
+
+  if (!original) throw notFound('Trip not found');
+  if (!original.isPublic && original.userId !== userId) {
+    throw forbidden('Cannot copy a private trip');
+  }
+
+  const newTrip = await prisma.trip.create({
+    data: {
+      userId,
+      name: `${original.name} (Copy)`,
+      startDate: original.startDate,
+      endDate: original.endDate,
+      travelerCount: original.travelerCount || 1,
+      description: original.description,
+      coverPhotoUrl: original.coverPhotoUrl,
+    },
+  });
+
+  for (const stop of original.stops) {
+    const newStop = await prisma.tripStop.create({
+      data: {
+        tripId: newTrip.id,
+        cityId: stop.cityId,
+        arrivalDate: stop.arrivalDate,
+        departureDate: stop.departureDate,
+        orderIndex: stop.orderIndex,
+        estimatedStayCost: stop.estimatedStayCost,
+        estimatedTransportCost: stop.estimatedTransportCost,
+        estimatedMealCost: stop.estimatedMealCost,
+      },
+    });
+
+    for (const sa of stop.activities) {
+      await prisma.stopActivity.create({
+        data: {
+          stopId: newStop.id,
+          activityId: sa.activityId,
+          scheduledAt: sa.scheduledAt,
+          costOverride: sa.costOverride,
+          orderIndex: sa.orderIndex,
+        },
+      });
+    }
+  }
+
+  return getTripById(newTrip.id, userId);
+}
+
 module.exports = {
   listTrips,
   createTrip,
   getTripById,
   updateTrip,
   deleteTrip,
+  getTripBySlug,
+  duplicateTrip,
   assertTripOwner,
 };

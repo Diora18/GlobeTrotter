@@ -2,24 +2,40 @@ const MEALS_PER_DAY = 50;
 const DAILY_BUDGET_ALERT = 200;
 
 function parseDateOnly(date) {
-  if (date instanceof Date) return date.toISOString().split('T')[0];
+  if (!date) return null;
+  if (date instanceof Date) {
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+  if (typeof date === 'string') {
+    return date.split('T')[0];
+  }
   return date;
 }
 
 function daysBetweenInclusive(start, end) {
-  const startDate = new Date(parseDateOnly(start));
-  const endDate = new Date(parseDateOnly(end));
+  const startStr = parseDateOnly(start);
+  const endStr = parseDateOnly(end);
+  const startDate = new Date(`${startStr}T00:00:00Z`);
+  const endDate = new Date(`${endStr}T00:00:00Z`);
   const diff = endDate.getTime() - startDate.getTime();
   return Math.max(1, Math.round(diff / (1000 * 60 * 60 * 24)) + 1);
 }
 
 function eachDayInclusive(start, end) {
   const days = [];
-  const current = new Date(parseDateOnly(start));
-  const last = new Date(parseDateOnly(end));
+  const startStr = parseDateOnly(start);
+  const endStr = parseDateOnly(end);
+  const current = new Date(`${startStr}T00:00:00Z`);
+  const last = new Date(`${endStr}T00:00:00Z`);
 
   while (current <= last) {
-    days.push(current.toISOString().split('T')[0]);
+    const year = current.getUTCFullYear();
+    const month = String(current.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(current.getUTCDate()).padStart(2, '0');
+    days.push(`${year}-${month}-${day}`);
     current.setUTCDate(current.getUTCDate() + 1);
   }
 

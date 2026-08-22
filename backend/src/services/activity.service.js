@@ -1,5 +1,5 @@
 const prisma = require('../lib/prisma');
-const { notFound } = require('../utils/errors');
+const { notFound, badRequest } = require('../utils/errors');
 const { formatActivity } = require('../utils/format');
 
 async function listActivities({ cityId, type, maxCost, minDuration, maxDuration, q, limit = 50 }) {
@@ -30,4 +30,27 @@ async function getActivityById(activityId) {
   return formatActivity(activity);
 }
 
-module.exports = { listActivities, getActivityById };
+async function createActivity({ cityId, name, description, type, estimatedCost, durationMinutes, imageUrl }) {
+  if (!cityId || !name) {
+    throw badRequest('City ID and activity name are required');
+  }
+
+  const city = await prisma.city.findUnique({ where: { id: cityId } });
+  if (!city) throw notFound('City not found');
+
+  const activity = await prisma.activity.create({
+    data: {
+      cityId,
+      name,
+      description: description || '',
+      type: type || 'custom',
+      estimatedCost: estimatedCost ? Number(estimatedCost) : 0,
+      durationMinutes: durationMinutes ? Number(durationMinutes) : 60,
+      imageUrl: imageUrl || city.imageUrl || null,
+    },
+  });
+
+  return formatActivity(activity);
+}
+
+module.exports = { listActivities, getActivityById, createActivity };

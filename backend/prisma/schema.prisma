@@ -8,15 +8,20 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  name         String
-  avatarUrl    String?  @map("avatar_url")
-  language     String   @default("en")
-  isAdmin      Boolean  @default(false) @map("is_admin")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id               String    @id @default(uuid())
+  email            String    @unique
+  passwordHash     String    @map("password_hash")
+  name             String
+  phoneNumber      String?   @map("phone_number")
+  city             String?
+  country          String?
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  avatarUrl        String?   @map("avatar_url")
+  language         String    @default("en")
+  isAdmin          Boolean   @default(false) @map("is_admin")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
   trips             Trip[]
   savedDestinations SavedDestination[]
@@ -30,6 +35,7 @@ model Trip {
   name          String
   startDate     DateTime @map("start_date") @db.Date
   endDate       DateTime @map("end_date") @db.Date
+  travelerCount Int      @default(1) @map("traveler_count")
   description   String?
   coverPhotoUrl String?  @map("cover_photo_url")
   isPublic      Boolean  @default(false) @map("is_public")
@@ -53,6 +59,7 @@ model TripStop {
   orderIndex              Int      @map("order_index")
   estimatedStayCost       Int      @default(0) @map("estimated_stay_cost")
   estimatedTransportCost  Int      @default(0) @map("estimated_transport_cost")
+  estimatedMealCost       Int      @default(0) @map("estimated_meal_cost")
   createdAt               DateTime @default(now()) @map("created_at")
 
   trip       Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)

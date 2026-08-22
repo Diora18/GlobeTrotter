@@ -10,7 +10,12 @@ function authMiddleware(req, res, next) {
 
   try {
     const payload = verifyToken(token);
-    req.user = { id: payload.id, email: payload.email, name: payload.name };
+    req.user = {
+      id: payload.id,
+      email: payload.email,
+      name: payload.name,
+      isAdmin: Boolean(payload.isAdmin),
+    };
     next();
   } catch {
     next(unauthorized('Invalid or expired session'));

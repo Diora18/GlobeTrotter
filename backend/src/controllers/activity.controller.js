@@ -18,4 +18,13 @@ async function getById(req, res, next) {
   }
 }
 
-module.exports = { list, getById };
+async function create(req, res, next) {
+  try {
+    const activity = await activityService.createActivity(req.body);
+    res.status(201).json({ success: true, data: { activity } });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { list, getById, create };

@@ -12,6 +12,7 @@ router.get('/', tripController.list);
 router.post('/', validate(createTripSchema), tripController.create);
 router.get('/:id/budget', budgetController.getByTripId);
 router.get('/:id', tripController.getById);
+router.post('/:id/duplicate', tripController.duplicate);
 router.patch('/:id', validate(updateTripSchema), tripController.update);
 router.delete('/:id', tripController.remove);
 

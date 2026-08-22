@@ -65,6 +65,7 @@ async function createStop(tripId, userId, data) {
 
   const estimatedStayCost = data.estimatedStayCost ?? nights * city.costIndex * STAY_COST_PER_INDEX;
   const estimatedTransportCost = data.estimatedTransportCost ?? 0;
+  const estimatedMealCost = data.estimatedMealCost ?? 0;
 
   const stop = await prisma.tripStop.create({
     data: {
@@ -75,6 +76,7 @@ async function createStop(tripId, userId, data) {
       orderIndex: lastStop ? lastStop.orderIndex + 1 : 0,
       estimatedStayCost,
       estimatedTransportCost,
+      estimatedMealCost,
     },
     include: {
       city: true,
@@ -100,6 +102,7 @@ async function updateStop(stopId, userId, data) {
       ...(data.departureDate ? { departureDate: parseDateOnly(data.departureDate) } : {}),
       ...(data.estimatedTransportCost !== undefined ? { estimatedTransportCost: data.estimatedTransportCost } : {}),
       ...(data.estimatedStayCost !== undefined ? { estimatedStayCost: data.estimatedStayCost } : {}),
+      ...(data.estimatedMealCost !== undefined ? { estimatedMealCost: data.estimatedMealCost } : {}),
     },
     include: {
       city: true,

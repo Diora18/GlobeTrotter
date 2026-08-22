@@ -1,7 +1,6 @@
 const prisma = require('../lib/prisma');
 const { forbidden, notFound } = require('../utils/errors');
 const {
-  MEALS_PER_DAY,
   DAILY_BUDGET_ALERT,
   daysBetweenInclusive,
   eachDayInclusive,
@@ -45,31 +44,32 @@ async function calculateBudget(tripId, userId) {
 
   const tripDays = daysBetweenInclusive(trip.startDate, trip.endDate);
   const allDates = eachDayInclusive(trip.startDate, trip.endDate);
-  const mealsTotal = tripDays * MEALS_PER_DAY;
-  const mealsPerDay = MEALS_PER_DAY;
 
   const byDayMap = {};
   for (const date of allDates) {
-    byDayMap[date] = { ...emptyDayBreakdown(), meals: mealsPerDay };
+    byDayMap[date] = { ...emptyDayBreakdown() };
   }
 
   let transportTotal = 0;
   let stayTotal = 0;
   let activitiesTotal = 0;
+  let mealsTotal = 0;
 
   const byStop = trip.stops.map((stop) => {
     const nights = nightsBetween(stop.arrivalDate, stop.departureDate);
-    const transport = stop.estimatedTransportCost;
-    const stay = stop.estimatedStayCost;
+    const transport = stop.estimatedTransportCost || 0;
+    const stay = stop.estimatedStayCost || 0;
+    const meals = stop.estimatedMealCost || 0;
 
     transportTotal += transport;
     stayTotal += stay;
+    mealsTotal += meals;
 
     const stopBreakdown = {
       transport,
       stay,
       activities: 0,
-      meals: 0,
+      meals: meals,
     };
 
     const arrivalDate = parseDateOnly(stop.arrivalDate);
@@ -78,15 +78,18 @@ async function calculateBudget(tripId, userId) {
     }
 
     const stayPerNight = nights > 0 ? Math.round(stay / nights) : stay;
+    const mealsPerDay = nights > 0 ? Math.round(meals / nights) : meals;
     const stopDates = eachDayInclusive(stop.arrivalDate, stop.departureDate);
     for (let i = 0; i < stopDates.length - 1; i += 1) {
       const date = stopDates[i];
       if (byDayMap[date]) {
         byDayMap[date].stay += stayPerNight;
+        byDayMap[date].meals += mealsPerDay;
       }
     }
     if (stopDates.length === 1 && byDayMap[stopDates[0]]) {
       byDayMap[stopDates[0]].stay += stay;
+      byDayMap[stopDates[0]].meals += meals;
     }
 
     for (const stopActivity of stop.activities) {
@@ -103,13 +106,10 @@ async function calculateBudget(tripId, userId) {
       }
     }
 
-    const stopMeals = nights * mealsPerDay;
-    stopBreakdown.meals = stopMeals;
-
     return {
       stopId: stop.id,
       cityName: stop.city.name,
-      total: sumBreakdown(stopBreakdown) + stopMeals,
+      total: sumBreakdown(stopBreakdown),
       nights,
       breakdown: stopBreakdown,
     };

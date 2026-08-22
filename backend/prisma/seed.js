@@ -328,7 +328,51 @@ async function main() {
     await createSampleTrip(khushUser, { ...tripConf, name: `Khush's ${tripConf.name}`, shareSlug: `khush-${tripConf.shareSlug}` });
   }
 
-  console.log('Seed complete! 25 cities, 100+ activities with photos, and 6 sample trips created.');
+  // Seed sample community posts & reviews
+  const parisCity = await prisma.city.findFirst({ where: { name: 'Paris' } });
+  const tokyoCity = await prisma.city.findFirst({ where: { name: 'Tokyo' } });
+
+  const post1 = await prisma.communityPost.upsert({
+    where: { id: 'c0000000-0000-0000-0000-000000000001' },
+    update: {},
+    create: {
+      id: 'c0000000-0000-0000-0000-000000000001',
+      userId: demoUser.id,
+      cityId: parisCity?.id,
+      title: 'Unforgettable 5 Days in Paris! Must-visit spots & dining tips 🥐🇫🇷',
+      content: 'We just wrapped up our Paris trip built on GlobeTrotter! The Seine sunset dinner cruise and Louvre guided tour were absolute highlights. Pro tip: book the Eiffel summit tickets early morning to avoid 2-hour queues!',
+      rating: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800',
+      likesCount: 14,
+    },
+  });
+
+  const post2 = await prisma.communityPost.upsert({
+    where: { id: 'c0000000-0000-0000-0000-000000000002' },
+    update: {},
+    create: {
+      id: 'c0000000-0000-0000-0000-000000000002',
+      userId: khushUser.id,
+      cityId: tokyoCity?.id,
+      title: 'Tokyo & Kyoto Autumn Travel Guide 🍁⛩️',
+      content: 'Fushimi Inari at 6:30 AM is magical. Practically zero crowds! TeamLab Planets digital art in Tokyo is mind-blowing. Don’t miss the Tsukiji Outer Market food tour!',
+      rating: 5,
+      imageUrl: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=800',
+      likesCount: 22,
+    },
+  });
+
+  // Seed sample comments
+  await prisma.communityComment.createMany({
+    data: [
+      { postId: post1.id, userId: khushUser.id, content: 'Awesome review! Did you take the metro or taxis mostly in Paris?' },
+      { postId: post1.id, userId: demoUser.id, content: 'We used the metro pass! Super fast and cost-effective.' },
+      { postId: post2.id, userId: adminUser.id, content: 'TeamLab Planets is truly a masterpiece. Great photography on this post!' },
+    ],
+    skipDuplicates: true,
+  });
+
+  console.log('Seed complete! 25 cities, 100+ activities with photos, sample trips & community reviews created.');
   console.log('Demo user: demo@globetrotter.com / password123');
   console.log('Khush user: khushptl173@gmail.com / password123');
 }

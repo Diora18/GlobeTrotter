@@ -13,6 +13,7 @@ import TripsPage from './pages/TripsPage';
 import PublicItineraryPage from './pages/PublicItineraryPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import CommunityPage from './pages/CommunityPage';
 
 function protectedPage(Page) {
   return (
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/dashboard" element={protectedPage(DashboardPage)} />
         <Route path="/trips" element={protectedPage(TripsPage)} />
+        <Route path="/community" element={<CommunityPage />} />
         <Route path="/settings" element={protectedPage(ProfileSettingsPage)} />
         <Route path="/admin" element={adminPage(AdminDashboardPage)} />
         <Route path="/trips/new" element={protectedPage(CreateTripPage)} />

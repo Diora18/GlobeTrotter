@@ -131,4 +131,5 @@ module.exports = {
   formatTripSummary,
   formatTripDetail,
   formatDate,
+  formatDateTime,
 };

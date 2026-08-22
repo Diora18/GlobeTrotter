@@ -16,6 +16,6 @@ export function getActivity(id) {
 export function createActivity(data) {
   return api('/api/activities', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: data,
   });
 }

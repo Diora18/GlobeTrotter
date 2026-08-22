@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Compass, LayoutDashboard, Map, Plus, LogOut, Shield } from 'lucide-react';
+import { Compass, LayoutDashboard, Map, Plus, LogOut, Shield, Users } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../lib/utils';
@@ -57,6 +57,18 @@ export function Navbar() {
               >
                 <Map className="h-4 w-4 text-emerald-600" />
                 My Trips
+              </Link>
+              <Link
+                to="/community"
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
+                  isCurrentPath('/community')
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                )}
+              >
+                <Users className="h-4 w-4 text-amber-600" />
+                Community
               </Link>
 
               {user.isAdmin && (

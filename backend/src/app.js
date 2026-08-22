@@ -12,8 +12,9 @@ const cityRoutes = require('./routes/city.routes');
 const activityRoutes = require('./routes/activity.routes');
 const sharedRoutes = require('./routes/shared.routes');
 const userRoutes = require('./routes/user.routes');
-const authMiddleware = require('./middleware/auth.middleware');
 const adminRoutes = require('./routes/admin.routes');
+const communityRoutes = require('./routes/community.routes');
+const authMiddleware = require('./middleware/auth.middleware');
 const errorMiddleware = require('./middleware/error.middleware');
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/shared', sharedRoutes);
+app.use('/api/community', communityRoutes);
 app.use('/api/users', authMiddleware, userRoutes);
 app.use('/api/trips', authMiddleware, tripRoutes);
 app.use('/api/stops', authMiddleware, stopRoutes);

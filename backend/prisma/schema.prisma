@@ -25,6 +25,9 @@ model User {
 
   trips             Trip[]
   savedDestinations SavedDestination[]
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityPostLike[]
 
   @@map("users")
 }
@@ -43,8 +46,9 @@ model Trip {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stops TripStop[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops          TripStop[]
+  communityPosts CommunityPost[]
 
   @@index([userId])
   @@map("trips")
@@ -61,28 +65,31 @@ model TripStop {
   estimatedTransportCost  Int      @default(0) @map("estimated_transport_cost")
   estimatedMealCost       Int      @default(0) @map("estimated_meal_cost")
   createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @default(now()) @updatedAt @map("updated_at")
 
   trip       Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  city       City           @relation(fields: [cityId], references: [id])
+  city       City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
   activities StopActivity[]
 
   @@index([tripId])
-  @@index([tripId, orderIndex])
+  @@index([cityId])
   @@map("trip_stops")
 }
 
 model City {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   name       String
   country    String
   region     String
-  costIndex  Int     @map("cost_index")
-  popularity Int
-  imageUrl   String? @map("image_url")
+  costIndex  Int      @map("cost_index")
+  popularity Int      @default(0)
+  imageUrl   String?  @map("image_url")
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  activities        Activity[]
   stops             TripStop[]
+  activities        Activity[]
   savedDestinations SavedDestination[]
+  communityPosts    CommunityPost[]
 
   @@map("cities")
 }
@@ -97,38 +104,87 @@ model Activity {
   durationMinutes Int     @map("duration_minutes")
   imageUrl        String? @map("image_url")
 
-  city          City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  city           City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
   stopActivities StopActivity[]
 
   @@index([cityId])
-  @@index([type])
   @@map("activities")
 }
 
 model StopActivity {
-  id            String    @id @default(uuid())
-  stopId        String    @map("stop_id")
-  activityId    String    @map("activity_id")
-  scheduledAt   DateTime? @map("scheduled_at")
-  costOverride  Int?      @map("cost_override")
-  orderIndex    Int       @default(0) @map("order_index")
+  id           String    @id @default(uuid())
+  stopId       String    @map("stop_id")
+  activityId   String    @map("activity_id")
+  scheduledAt  DateTime? @map("scheduled_at") @db.Date
+  costOverride Int?      @map("cost_override")
+  orderIndex   Int       @default(0) @map("order_index")
 
   stop     TripStop @relation(fields: [stopId], references: [id], onDelete: Cascade)
-  activity Activity @relation(fields: [activityId], references: [id])
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
   @@index([stopId])
+  @@index([activityId])
   @@map("stop_activities")
 }
 
 model SavedDestination {
-  id     String   @id @default(uuid())
-  userId String   @map("user_id")
-  cityId String   @map("city_id")
-  savedAt DateTime @default(now()) @map("saved_at")
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  cityId    String   @map("city_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, cityId])
   @@map("saved_destinations")
+}
+
+model CommunityPost {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  tripId     String?  @map("trip_id")
+  cityId     String?  @map("city_id")
+  title      String
+  content    String
+  rating     Int      @default(5)
+  imageUrl   String?  @map("image_url")
+  likesCount Int      @default(0) @map("likes_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip     Trip?               @relation(fields: [tripId], references: [id], onDelete: SetNull)
+  city     City?               @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  comments CommunityComment[]
+  likes    CommunityPostLike[]
+
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  userId    String   @map("user_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("community_comments")
+}
+
+model CommunityPostLike {
+  id        String   @id @default(uuid())
+  postId    String   @map("post_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("community_post_likes")
 }

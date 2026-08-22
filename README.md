@@ -42,6 +42,7 @@ Start with **[docs/HANDBOOK.md](./docs/HANDBOOK.md)** — it links to everything
 | [DATABASE.md](./docs/DATABASE.md) | Schema and relationships |
 | [api/](./docs/api/) | API contracts (request/response) |
 | [TASKS.md](./docs/TASKS.md) | Milestones and ownership |
+| [INTEGRATION.md](./docs/INTEGRATION.md) | Branch checklists — what to test before merge |
 
 ## Mockup reference
 
